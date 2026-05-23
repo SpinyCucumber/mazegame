@@ -8,7 +8,7 @@ export type Coordinate = RecordOf<CoordinateProps>;
 export type Offset = Coordinate;
 export type Orientation = 0 | 1 | 2 | 3;
 
-export interface ITile {
+export interface IPlacedTile {
     id: TileID;
     orientation: Orientation;
 }
@@ -18,14 +18,14 @@ export interface ITilemap {
     rotated(amount: number, about?: Coordinate): ITilemap;
     isOverlapping(other: ITilemap): boolean;
     union(other: ITilemap): ITilemap;
-    readonly tiles: Map<Coordinate, ITile>;
+    readonly tiles: Map<Coordinate, IPlacedTile>;
 }
 
 export class Tilemap implements ITilemap {
 
-    tiles: Map<Coordinate, ITile>;
+    tiles: Map<Coordinate, IPlacedTile>;
 
-    constructor(tiles: Iterable<[Coordinate, ITile]>) {
+    constructor(tiles: Iterable<[Coordinate, IPlacedTile]>) {
         this.tiles = Map(tiles);
     }
 

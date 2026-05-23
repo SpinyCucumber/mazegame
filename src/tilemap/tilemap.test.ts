@@ -1,7 +1,7 @@
 import { Coordinate, Tilemap } from "./tilemap";
-import type { ITile } from "./tilemap";
+import type { IPlacedTile } from "./tilemap";
 
-const tile = (id: number): ITile => ({ id, orientation: 0 });
+const tile = (id: number): IPlacedTile => ({ id, orientation: 0 });
 
 describe("Tilemap", () => {
     it("stores tiles accessible by coordinate via the tiles property", () => {
