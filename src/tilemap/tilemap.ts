@@ -1,11 +1,6 @@
-import { Map, Set, Record } from "immutable";
-import type { RecordOf } from "immutable";
+import { Map, Set } from "immutable";
 import { Direction, TileID } from "./tileset";
-
-type CoordinateOptions = { x: number; y: number };
-export const Coordinate = Record<CoordinateOptions>({ x: 0, y: 0 });
-export type Coordinate = RecordOf<CoordinateOptions>;
-export type Offset = Coordinate;
+import { Coordinate, Offset } from "./coordinate";
 
 export interface IPlacedTile {
     id: TileID;
@@ -30,24 +25,16 @@ export class Tilemap implements ITilemap {
 
     transposed(offset: Offset): ITilemap {
         return new Tilemap(
-            this.tiles.mapKeys(
-                (coord) => Coordinate({ x: coord.x + offset.x, y: coord.y + offset.y })
-            )
+            this.tiles.mapKeys((coord) => coord.added(offset))
         );
     }
 
-    rotated(amount: number, about = Coordinate({ x: 0, y: 0 })): ITilemap {
-        const o = amount % 4;
+    rotated(amount: number, about = new Coordinate()): ITilemap {
         return new Tilemap(
             this.tiles.mapEntries(
                 ([coord, { id, orientation }]) => {
-                    let dx = coord.x - about.x;
-                    let dy = coord.y - about.y;
-                    for (let i = 0; i < o; i++) {
-                        [dx, dy] = [-dy, dx];
-                    }
-                    const no = (orientation + o) % 4 as Direction;
-                    return [Coordinate({ x: dx + about.x, y: dy + about.y }), { id, orientation: no }];
+                    const no = (orientation + amount) % 4 as Direction;
+                    return [coord.rotated(amount, about), { id, orientation: no }];
                 }
             )
         );
