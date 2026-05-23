@@ -24,4 +24,20 @@ describe("Tilemap", () => {
         const rotated = t.rotated(1);
         expect(rotated.tiles.get(Coordinate({ x: 0, y: 1 }))).toEqual({ id: 1, orientation: 1 });
     });
+
+    it("should detect overlapping tilemaps", () => {
+        const t1 = new Tilemap([[Coordinate({ x: 1, y: 2 }), tile(1)]]);
+        const t2 = new Tilemap([[Coordinate({ x: 1, y: 2 }), tile(2)]]);
+        const t3 = new Tilemap([[Coordinate({ x: 3, y: 4 }), tile(3)]]);
+        expect(t1.isOverlapping(t2)).toBe(true);
+        expect(t1.isOverlapping(t3)).toBe(false);
+    });
+
+    it("union combines the tiles of two tilemaps", () => {
+        const t1 = new Tilemap([[Coordinate({ x: 1, y: 2 }), tile(1)]]);
+        const t2 = new Tilemap([[Coordinate({ x: 3, y: 4 }), tile(2)]]);
+        const union = t1.union(t2);
+        expect(union.tiles.get(Coordinate({ x: 1, y: 2 }))).toEqual(tile(1));
+        expect(union.tiles.get(Coordinate({ x: 3, y: 4 }))).toEqual(tile(2));
+    });
 });

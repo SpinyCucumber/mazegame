@@ -1,4 +1,4 @@
-import { Map, Record } from "immutable";
+import { Map, Set, Record } from "immutable";
 import type { RecordOf } from "immutable";
 
 export type TileID = number;
@@ -16,6 +16,8 @@ export interface ITile {
 export interface ITilemap {
     transposed(offset: Offset): ITilemap;
     rotated(amount: number, about?: Coordinate): ITilemap;
+    isOverlapping(other: ITilemap): boolean;
+    union(other: ITilemap): ITilemap;
     readonly tiles: Map<Coordinate, ITile>;
 }
 
@@ -50,6 +52,16 @@ export class Tilemap implements ITilemap {
                 }
             )
         );
+    }
+
+    isOverlapping(other: ITilemap): boolean {
+        const ownCoords = Set(this.tiles.keys());
+        const otherCoords = Set(other.tiles.keys());
+        return ownCoords.intersect(otherCoords).size > 0;
+    }
+
+    union(other: ITilemap): ITilemap {
+        return new Tilemap(this.tiles.concat(other.tiles));
     }
 
 }
