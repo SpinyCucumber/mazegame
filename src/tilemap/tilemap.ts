@@ -1,16 +1,15 @@
 import { Map, Set, Record } from "immutable";
 import type { RecordOf } from "immutable";
+import { Direction, TileID } from "./tileset";
 
-export type TileID = number;
-type CoordinateProps = { x: number; y: number };
-export const Coordinate = Record<CoordinateProps>({ x: 0, y: 0 });
-export type Coordinate = RecordOf<CoordinateProps>;
+type CoordinateOptions = { x: number; y: number };
+export const Coordinate = Record<CoordinateOptions>({ x: 0, y: 0 });
+export type Coordinate = RecordOf<CoordinateOptions>;
 export type Offset = Coordinate;
-export type Orientation = 0 | 1 | 2 | 3;
 
 export interface IPlacedTile {
     id: TileID;
-    orientation: Orientation;
+    orientation: Direction;
 }
 
 export interface ITilemap {
@@ -47,7 +46,7 @@ export class Tilemap implements ITilemap {
                     for (let i = 0; i < o; i++) {
                         [dx, dy] = [-dy, dx];
                     }
-                    const no = (orientation + o) % 4 as Orientation;
+                    const no = (orientation + o) % 4 as Direction;
                     return [Coordinate({ x: dx + about.x, y: dy + about.y }), { id, orientation: no }];
                 }
             )
