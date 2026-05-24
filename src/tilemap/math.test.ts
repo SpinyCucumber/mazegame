@@ -1,4 +1,4 @@
-import { Coordinate, Offset, Direction, rotateDirection, encodeAsBits, decodeFromBits, Edge, getOppositeEdge } from "./math";
+import { Coordinate, Offset, Direction, rotateDirection, encodeAsBits, decodeFromBits, Edge, getOppositeEdge, getOppositeDirection } from "./math";
 
 describe("Offset.rotated", () => {
     it("rotates (1, 0) by 1 quarter-turn → (0, 1)", () => {
@@ -120,7 +120,7 @@ describe("getOppositeEdge", () => {
         for (const [dir, expectedCoord] of cases) {
             const opposite = getOppositeEdge(new Edge({ coordinate: new Coordinate(), direction: dir }));
             expect(opposite.coordinate).toEqual(expectedCoord);
-            expect(opposite.direction).toBe(rotateDirection(dir, 2));
+            expect(opposite.direction).toBe(getOppositeDirection(dir));
         }
     });
 

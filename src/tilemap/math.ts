@@ -44,6 +44,10 @@ export function rotateDirection(dir: Direction, numQuarterTurns: number) {
     return (dir + o) % 4 as Direction;
 }
 
+export function getOppositeDirection(dir: Direction): Direction {
+    return rotateDirection(dir, 2);
+}
+
 export function encodeAsBits(dirs: Direction[]): number {
     let bits = 0;
     for (const dir of dirs) {
@@ -65,6 +69,6 @@ export type EdgeOptions = { coordinate: Coordinate; direction: Direction; };
 export function getOppositeEdge(edge: Edge): Edge {
     return edge.merge({
         coordinate: edge.coordinate.added(asOffset(edge.direction)),
-        direction: rotateDirection(edge.direction, 2),
+        direction: getOppositeDirection(edge.direction),
     });
 }
