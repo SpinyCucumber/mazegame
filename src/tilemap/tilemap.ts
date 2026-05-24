@@ -1,22 +1,20 @@
-import { Map as FixedMap, Set, List, Record } from "immutable";
+import { Map as FixedMap, Set, Record } from "immutable";
 import { ITileset, TileID } from "./tileset";
 import { Direction, rotateDirection, Coordinate, Offset } from "./math";
 
 type EdgeOptions = { coordinate: Coordinate; direction: Direction };
 export class Edge extends Record<EdgeOptions>({ coordinate: new Coordinate(), direction: Direction.Right }) {}
 
-type Openings = List<Edge>;
-
 namespace ValidationStates {
     export const Unchecked = { type: "unchecked" } as const;
     export const Invalid = { type: "invalid" } as const;
     export interface UncheckedMerge {
         type: "uncheckedMerge";
-        mergedOpenings: Openings[];
+        mergedOpenings: Set<Edge>[];
     }
     export interface Valid {
         type: "valid";
-        openings: Openings;
+        openings: Set<Edge>;
     }
 }
 
@@ -27,7 +25,7 @@ export interface IPlacedTile {
     orientation: Direction;
 }
 
-function getUnmergedOpenings(validationState: ValidationState): Openings[] {
+function getUnmergedOpenings(validationState: ValidationState): Set<Edge>[] {
     switch (validationState.type) {
         case "uncheckedMerge":
             return validationState.mergedOpenings;
