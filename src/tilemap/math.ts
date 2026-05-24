@@ -63,12 +63,12 @@ export function decodeFromBits(bits: number): Direction[] {
     ) as Direction[];
 }
 
-export class Edge extends Record<EdgeOptions>({ coordinate: new Coordinate(), direction: Direction.Right }) { }
-export type EdgeOptions = { coordinate: Coordinate; direction: Direction; };
-
-export function getOppositeEdge(edge: Edge): Edge {
-    return edge.merge({
-        coordinate: edge.coordinate.added(asOffset(edge.direction)),
-        direction: getOppositeDirection(edge.direction),
-    });
+export class Edge extends Record<EdgeOptions>({ coordinate: new Coordinate(), direction: Direction.Right }) {
+    getOpposite(): Edge {
+        return this.merge({
+            coordinate: this.coordinate.added(asOffset(this.direction)),
+            direction: getOppositeDirection(this.direction),
+        });
+    }
 }
+export type EdgeOptions = { coordinate: Coordinate; direction: Direction; };

@@ -1,4 +1,4 @@
-import { Coordinate, Offset, Direction, rotateDirection, encodeAsBits, decodeFromBits, Edge, getOppositeEdge, getOppositeDirection } from "./math";
+import { Coordinate, Offset, Direction, rotateDirection, encodeAsBits, decodeFromBits, Edge, getOppositeDirection } from "./math";
 
 describe("Offset.rotated", () => {
     it("rotates (1, 0) by 1 quarter-turn → (0, 1)", () => {
@@ -101,11 +101,11 @@ describe("decodeFromBits", () => {
     });
 });
 
-describe("getOppositeEdge", () => {
+describe("Edge.getOpposite", () => {
     it("steps one tile in the edge direction and reverses it", () => {
         // Edge facing Right at (0, 0) → opposite is facing Left at (1, 0)
         const edge = new Edge({ coordinate: new Coordinate({ x: 0, y: 0 }), direction: Direction.Right });
-        const opposite = getOppositeEdge(edge);
+        const opposite = edge.getOpposite();
         expect(opposite.coordinate).toEqual(new Coordinate({ x: 1, y: 0 }));
         expect(opposite.direction).toBe(Direction.Left);
     });
@@ -118,7 +118,7 @@ describe("getOppositeEdge", () => {
             [Direction.Up,    new Coordinate({ x: 0, y: -1 })],
         ];
         for (const [dir, expectedCoord] of cases) {
-            const opposite = getOppositeEdge(new Edge({ coordinate: new Coordinate(), direction: dir }));
+            const opposite = new Edge({ coordinate: new Coordinate(), direction: dir }).getOpposite();
             expect(opposite.coordinate).toEqual(expectedCoord);
             expect(opposite.direction).toBe(getOppositeDirection(dir));
         }
@@ -126,6 +126,6 @@ describe("getOppositeEdge", () => {
 
     it("applying twice returns the original edge", () => {
         const edge = new Edge({ coordinate: new Coordinate({ x: 3, y: -2 }), direction: Direction.Up });
-        expect(getOppositeEdge(getOppositeEdge(edge))).toEqual(edge);
+        expect(edge.getOpposite().getOpposite()).toEqual(edge);
     });
 });
