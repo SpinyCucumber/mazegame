@@ -1,4 +1,4 @@
-import { Map as FixedMap, Set, Record } from "immutable";
+import { Map, Set as FixedSet, Record } from "immutable";
 import { ITileset, TileID } from "./tileset";
 import { Direction, rotateDirection, Coordinate, Offset } from "./math";
 
@@ -10,11 +10,11 @@ namespace ValidationStates {
     export const Invalid = { type: "invalid" } as const;
     export interface UncheckedMerge {
         type: "uncheckedMerge";
-        mergedOpenings: Set<Edge>[];
+        mergedOpenings: FixedSet<Edge>[];
     }
     export interface Valid {
         type: "valid";
-        openings: Set<Edge>;
+        openings: FixedSet<Edge>;
     }
 }
 
@@ -25,7 +25,7 @@ export interface IPlacedTile {
     orientation: Direction;
 }
 
-function getUnmergedOpenings(validationState: ValidationState): Set<Edge>[] {
+function getUnmergedOpenings(validationState: ValidationState): FixedSet<Edge>[] {
     switch (validationState.type) {
         case "uncheckedMerge":
             return validationState.mergedOpenings;
@@ -38,13 +38,13 @@ function getUnmergedOpenings(validationState: ValidationState): Set<Edge>[] {
 
 export class Tilemap {
 
-    tiles: FixedMap<Coordinate, IPlacedTile>;
+    tiles: Map<Coordinate, IPlacedTile>;
     private _validationState: ValidationState;
     private _tileset: ITileset;
 
     private constructor(tileset: ITileset, tiles: Iterable<[Coordinate, IPlacedTile]>, validationState: ValidationState) {
         this._tileset = tileset;
-        this.tiles = FixedMap(tiles);
+        this.tiles = Map(tiles);
         this._validationState = validationState;
     }
 
@@ -112,8 +112,8 @@ export class Tilemap {
     }
 
     isOverlapping(other: Tilemap): boolean {
-        const ownCoords = Set(this.tiles.keys());
-        const otherCoords = Set(other.tiles.keys());
+        const ownCoords = FixedSet(this.tiles.keys());
+        const otherCoords = FixedSet(other.tiles.keys());
         return ownCoords.intersect(otherCoords).size > 0;
     }
 
