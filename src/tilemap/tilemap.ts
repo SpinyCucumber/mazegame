@@ -1,5 +1,5 @@
 import { Map, Set } from "immutable";
-import { TileID } from "./tileset";
+import { ITileset, TileID } from "./tileset";
 import { Direction, rotateDirection, Coordinate, Offset } from "./math";
 
 type Openings = Map<Coordinate, Set<Direction>>;
@@ -39,18 +39,21 @@ export class Tilemap {
 
     tiles: Map<Coordinate, IPlacedTile>;
     private _validationState: ValidationState;
+    private _tileset: ITileset;
 
-    private constructor(tiles: Iterable<[Coordinate, IPlacedTile]>, validationState: ValidationState) {
+    private constructor(tileset: ITileset, tiles: Iterable<[Coordinate, IPlacedTile]>, validationState: ValidationState) {
+        this._tileset = tileset;
         this.tiles = Map(tiles);
         this._validationState = validationState;
     }
 
-    static fromTiles(tiles: Iterable<[Coordinate, IPlacedTile]>): Tilemap {
-        return new Tilemap(tiles, ValidationStates.Unchecked);
+    static fromTiles(tileset: ITileset, tiles: Iterable<[Coordinate, IPlacedTile]>): Tilemap {
+        return new Tilemap(tileset, tiles, ValidationStates.Unchecked);
     }
 
     transposed(offset: Offset): Tilemap {
         return new Tilemap(
+            this._tileset,
             this.tiles.mapKeys((coord) => coord.added(offset)),
             (() => {
                 switch (this._validationState.type) {
@@ -76,6 +79,7 @@ export class Tilemap {
 
     rotated(amount: number, about = new Coordinate()): Tilemap {
         return new Tilemap(
+            this._tileset,
             this.tiles.mapEntries(
                 ([coord, { id, orientation }]) => {
                     const no = rotateDirection(orientation, amount);
@@ -113,7 +117,11 @@ export class Tilemap {
     }
 
     merge(other: Tilemap): Tilemap {
+        if (this._tileset !== other._tileset) {
+            throw new Error("Cannot merge tilemaps with different tilesets");
+        }
         return new Tilemap(
+            this._tileset,
             this.tiles.concat(other.tiles),
             (() => {
                 if (this._validationState.type === "invalid" || other._validationState.type === "invalid")
