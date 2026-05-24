@@ -1,6 +1,6 @@
 import { Map, Set as FixedSet } from "immutable";
 import { ITileset, TileID } from "./tileset";
-import { Direction, rotateDirection, Coordinate, Offset, Edge } from "./math";
+import { Direction, rotateDirection, Coordinate, Offset, Edge } from "../utility/math";
 
 namespace ValidationStates {
     export const Unchecked = { type: "unchecked" } as const;

@@ -1,5 +1,5 @@
 import { Map } from "immutable";
-import { Direction, encodeAsBits, decodeFromBits } from "./math";
+import { Direction, encodeAsBits, decodeFromBits } from "../utility/math";
 
 export type TileID = number;
 
