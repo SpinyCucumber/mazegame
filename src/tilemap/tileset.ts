@@ -1,13 +1,7 @@
 import { Map } from "immutable";
+import { Direction, encodeAsBits, decodeFromBits } from "./math";
 
 export type TileID = number;
-
-export enum Direction {
-    Right = 0,
-    Down = 1,
-    Left = 2,
-    Up = 3,
-}
 
 export interface ITileDefOptions {
     id: TileID;
@@ -30,13 +24,7 @@ export class Tileset implements ITileset {
 
     constructor(options: Iterable<ITileDefOptions>) {
         this._connectionMap = Map([...options].map(
-            ({ id, connections }) => {
-                let bits = 0;
-                for (const dir of connections) {
-                    bits |= 1 << dir;
-                }
-                return [id, bits];
-            }
+            ({ id, connections }) => [id, encodeAsBits(connections)]
         ));
     }
 
@@ -45,10 +33,7 @@ export class Tileset implements ITileset {
         if (bits === undefined) {
             throw new Error(`Tile ID ${id} not found in tileset`);
         }
-        const connections = Object.values(Direction).filter(
-            (dir) => typeof dir === "number"
-            && (bits & (1 << dir)) !== 0
-        ) as Direction[];
+        const connections = decodeFromBits(bits);
         return {
             id,
             hasConnection(dir: Direction): boolean {

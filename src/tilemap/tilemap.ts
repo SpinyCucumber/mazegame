@@ -1,6 +1,6 @@
 import { Map, Set } from "immutable";
-import { Direction, TileID } from "./tileset";
-import { Coordinate, Offset } from "./coordinate";
+import { TileID } from "./tileset";
+import { Direction, rotateDirection, Coordinate, Offset } from "./math";
 
 type Openings = Map<Coordinate, Set<Direction>>;
 
@@ -78,7 +78,7 @@ export class Tilemap {
         return new Tilemap(
             this.tiles.mapEntries(
                 ([coord, { id, orientation }]) => {
-                    const no = (orientation + amount) % 4 as Direction;
+                    const no = rotateDirection(orientation, amount);
                     return [coord.rotated(amount, about), { id, orientation: no }];
                 }
             ),
@@ -91,14 +91,14 @@ export class Tilemap {
                         return {
                             type: "uncheckedMerge",
                             mergedOpenings: this._validationState.mergedOpenings.map((o) =>
-                                Map(o.mapEntries(([coord, dirs]) => [coord.rotated(amount, about), dirs.map((d) => (d + amount) % 4 as Direction)]))
+                                Map(o.mapEntries(([coord, dirs]) => [coord.rotated(amount, about), dirs.map((d) => rotateDirection(d, amount))]))
                             ),
                         };
                     case "valid":
                         return {
                             type: "valid",
                             openings: Map(this._validationState.openings.mapEntries(
-                                ([coord, dirs]) => [coord.rotated(amount, about), dirs.map((d) => (d + amount) % 4 as Direction)])
+                                ([coord, dirs]) => [coord.rotated(amount, about), dirs.map((d) => rotateDirection(d, amount))])
                             ),
                         };
                 }

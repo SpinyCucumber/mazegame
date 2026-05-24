@@ -1,4 +1,4 @@
-import { Coordinate } from "./coordinate";
+import { Coordinate } from "./math";
 import { Tilemap } from "./tilemap";
 import type { IPlacedTile } from "./tilemap";
 

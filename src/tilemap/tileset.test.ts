@@ -1,4 +1,5 @@
-import { Direction, Tileset } from "./tileset";
+import { Tileset } from "./tileset";
+import { Direction } from "./math";
 
 describe("Tileset", () => {
     
