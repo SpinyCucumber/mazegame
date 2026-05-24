@@ -1,4 +1,20 @@
-import { Coordinate, Offset, Direction, rotateDirection, encodeAsBits, decodeFromBits } from "./math";
+import { Coordinate, Offset, Direction, rotateDirection, encodeAsBits, decodeFromBits, Edge, getOppositeEdge } from "./math";
+
+describe("Offset.rotated", () => {
+    it("rotates (1, 0) by 1 quarter-turn → (0, 1)", () => {
+        expect(new Offset({ x: 1, y: 0 }).rotated(1)).toEqual(new Offset({ x: 0, y: 1 }));
+    });
+
+    it("rotating by 4 is a no-op", () => {
+        const offset = new Offset({ x: 2, y: 3 });
+        expect(offset.rotated(4)).toEqual(offset);
+    });
+
+    it("handles negative amounts", () => {
+        // (0, 1) rotated -1 (clockwise) → (1, 0)
+        expect(new Offset({ x: 0, y: 1 }).rotated(-1)).toEqual(new Offset({ x: 1, y: 0 }));
+    });
+});
 
 describe("Coordinate.added", () => {
     it("returns a new coordinate shifted by the given offset", () => {
@@ -82,5 +98,34 @@ describe("decodeFromBits", () => {
     it("round-trips with encodeAsBits", () => {
         const dirs = [Direction.Right, Direction.Up, Direction.Down];
         expect(decodeFromBits(encodeAsBits(dirs))).toEqual(expect.arrayContaining(dirs));
+    });
+});
+
+describe("getOppositeEdge", () => {
+    it("steps one tile in the edge direction and reverses it", () => {
+        // Edge facing Right at (0, 0) → opposite is facing Left at (1, 0)
+        const edge = new Edge({ coordinate: new Coordinate({ x: 0, y: 0 }), direction: Direction.Right });
+        const opposite = getOppositeEdge(edge);
+        expect(opposite.coordinate).toEqual(new Coordinate({ x: 1, y: 0 }));
+        expect(opposite.direction).toBe(Direction.Left);
+    });
+
+    it("works for all four cardinal directions", () => {
+        const cases: [Direction, Coordinate][] = [
+            [Direction.Right, new Coordinate({ x: 1, y: 0 })],
+            [Direction.Down,  new Coordinate({ x: 0, y: 1 })],
+            [Direction.Left,  new Coordinate({ x: -1, y: 0 })],
+            [Direction.Up,    new Coordinate({ x: 0, y: -1 })],
+        ];
+        for (const [dir, expectedCoord] of cases) {
+            const opposite = getOppositeEdge(new Edge({ coordinate: new Coordinate(), direction: dir }));
+            expect(opposite.coordinate).toEqual(expectedCoord);
+            expect(opposite.direction).toBe(rotateDirection(dir, 2));
+        }
+    });
+
+    it("applying twice returns the original edge", () => {
+        const edge = new Edge({ coordinate: new Coordinate({ x: 3, y: -2 }), direction: Direction.Up });
+        expect(getOppositeEdge(getOppositeEdge(edge))).toEqual(edge);
     });
 });
