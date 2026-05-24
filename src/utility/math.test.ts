@@ -1,4 +1,4 @@
-import { Coordinate, Offset, Direction, rotateDirection, encodeAsBits, decodeFromBits, Edge, getOppositeDirection } from "./math";
+import { Coordinate, Offset, Direction, rotateDirection, encodeAsBits, decodeFromBits, Edge, getOppositeDirection, Extent } from "./math";
 
 describe("Offset.rotated", () => {
     it("rotates (1, 0) by 1 quarter-turn → (0, 1)", () => {
@@ -127,5 +127,17 @@ describe("Edge.getOpposite", () => {
     it("applying twice returns the original edge", () => {
         const edge = new Edge({ coordinate: new Coordinate({ x: 3, y: -2 }), direction: Direction.Up });
         expect(edge.getOpposite().getOpposite()).toEqual(edge);
+    });
+});
+
+describe("Extent.getCenter", () => {
+    it("returns the midpoint of min and max", () => {
+        const extent = new Extent({ min: new Coordinate({ x: 0, y: 0 }), max: new Coordinate({ x: 4, y: 6 }) });
+        expect(extent.getCenter()).toEqual(new Coordinate({ x: 2, y: 3 }));
+    });
+
+    it("returns a fractional center when the extent has odd dimensions", () => {
+        const extent = new Extent({ min: new Coordinate({ x: 0, y: 0 }), max: new Coordinate({ x: 3, y: 1 }) });
+        expect(extent.getCenter()).toEqual(new Coordinate({ x: 1.5, y: 0.5 }));
     });
 });
