@@ -1,8 +1,11 @@
-import { Map as FixedMap, Set } from "immutable";
+import { Map as FixedMap, Set, List, Record } from "immutable";
 import { ITileset, TileID } from "./tileset";
 import { Direction, rotateDirection, Coordinate, Offset } from "./math";
 
-type Openings = FixedMap<Coordinate, Set<Direction>>;
+type EdgeOptions = { coordinate: Coordinate; direction: Direction };
+export class Edge extends Record<EdgeOptions>({ coordinate: new Coordinate(), direction: Direction.Right }) {}
+
+type Openings = List<Edge>;
 
 namespace ValidationStates {
     export const Unchecked = { type: "unchecked" } as const;
@@ -64,13 +67,13 @@ export class Tilemap {
                         return {
                             type: "uncheckedMerge",
                             mergedOpenings: this._validationState.mergedOpenings.map((o) =>
-                                FixedMap(o.mapKeys((coord) => coord.added(offset)))
+                                o.map((edge) => edge.set("coordinate", edge.coordinate.added(offset)))
                             ),
                         };
                     case "valid":
                         return {
                             type: "valid",
-                            openings: FixedMap(this._validationState.openings.mapKeys((coord) => coord.added(offset))),
+                            openings: this._validationState.openings.map((edge) => edge.set("coordinate", edge.coordinate.added(offset))),
                         };
                 }
             })()
@@ -95,14 +98,14 @@ export class Tilemap {
                         return {
                             type: "uncheckedMerge",
                             mergedOpenings: this._validationState.mergedOpenings.map((o) =>
-                                FixedMap(o.mapEntries(([coord, dirs]) => [coord.rotated(amount, about), dirs.map((d) => rotateDirection(d, amount))]))
+                                o.map((edge) => edge.merge({ coordinate: edge.coordinate.rotated(amount, about), direction: rotateDirection(edge.direction, amount) }))
                             ),
                         };
                     case "valid":
                         return {
                             type: "valid",
-                            openings: FixedMap(this._validationState.openings.mapEntries(
-                                ([coord, dirs]) => [coord.rotated(amount, about), dirs.map((d) => rotateDirection(d, amount))])
+                            openings: this._validationState.openings.map((edge) =>
+                                edge.merge({ coordinate: edge.coordinate.rotated(amount, about), direction: rotateDirection(edge.direction, amount) })
                             ),
                         };
                 }
