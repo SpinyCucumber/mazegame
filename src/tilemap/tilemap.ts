@@ -137,8 +137,57 @@ export class Tilemap {
         );      
     }
 
-    private validate() {
-        // TODO
+    private validate(): ValidationState {
+        switch (this._validationState.type) {
+            case "valid":
+            case "invalid":
+                return this._validationState;
+            case "unchecked":
+            case "uncheckedMerge": {
+                let openings: FixedSet<Edge>;
+                if (this._validationState.type === "unchecked") {
+                    // If no previous merges, must perform full validation
+                    // For each connection, if the set of openings already contains the _opposite_ edge, remote and skip it.
+                    openings = FixedSet<Edge>();
+                    for (const [coordinate, { id, orientation }] of this.tiles) {
+                        const tileDef = this._tileset.getTileDef(id);
+                        for (const dir of tileDef.connections) {
+                            const edge = new Edge({ coordinate, direction: rotateDirection(dir, orientation) });
+                            const opposite = edge.getOpposite();
+                            if (openings.has(opposite)) {
+                                openings = openings.delete(opposite);
+                            } else {
+                                openings = openings.add(edge);
+                            }
+                        }
+                    }
+                }
+                else {
+                    // If we have previous merges, we can get a bit clever and only check for corresponding openings
+                    // between existing openings and new openings, since we know each merged tilemap is already internally valid.
+                    openings = this._validationState.mergedOpenings[0];
+                    for (let i = 1; i < this._validationState.mergedOpenings.length; i++) {
+                        const newOpenings = this._validationState.mergedOpenings[i];
+                        for (const edge of newOpenings) {
+                            const opposite = edge.getOpposite();
+                            if (openings.has(opposite)) {
+                                openings = openings.delete(opposite);
+                            } else {
+                                openings = openings.add(edge);
+                            }
+                        }
+                    }
+                }
+                // For remaining openings, we check if the opposite edge has a tile.
+                // If it does, the tilemap is invalid.
+                for (const edge of openings) {
+                    const opposite = edge.getOpposite();
+                    const oppositeTile = this.tiles.get(opposite.coordinate);
+                    if (oppositeTile !== undefined) return ValidationStates.Invalid;
+                }
+                return { type: "valid", openings };
+            }
+        }
     }
 
     /**
@@ -152,7 +201,7 @@ export class Tilemap {
      * the tilemap is invalid.
      */
     isValid(): boolean {
-        this.validate();
+        this._validationState = this.validate();
         return this._validationState.type === "valid";
     }
 
