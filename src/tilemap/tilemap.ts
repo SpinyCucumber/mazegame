@@ -1,22 +1,20 @@
-import { Map as FixedMap, Set, List, Record } from "immutable";
+import { Map as FixedMap, Set, Record } from "immutable";
 import { ITileset, TileID } from "./tileset";
 import { Direction, rotateDirection, Coordinate, Offset } from "./math";
 
 type EdgeOptions = { coordinate: Coordinate; direction: Direction };
 export class Edge extends Record<EdgeOptions>({ coordinate: new Coordinate(), direction: Direction.Right }) {}
 
-type Openings = List<Edge>;
-
 namespace ValidationStates {
     export const Unchecked = { type: "unchecked" } as const;
     export const Invalid = { type: "invalid" } as const;
     export interface UncheckedMerge {
         type: "uncheckedMerge";
-        mergedOpenings: Openings[];
+        openings: Set<Edge>;
     }
     export interface Valid {
         type: "valid";
-        openings: Openings;
+        openings: Set<Edge>;
     }
 }
 
@@ -27,15 +25,11 @@ export interface IPlacedTile {
     orientation: Direction;
 }
 
-function getUnmergedOpenings(validationState: ValidationState): Openings[] {
-    switch (validationState.type) {
-        case "uncheckedMerge":
-            return validationState.mergedOpenings;
-        case "valid":
-            return [validationState.openings];
-        default:
-            return [];
+function getUnmergedOpenings(validationState: ValidationState): Set<Edge> {
+    if ("openings" in validationState) {
+        return validationState.openings;
     }
+    return Set();
 }
 
 export class Tilemap {
@@ -64,15 +58,9 @@ export class Tilemap {
                     case "invalid":
                         return this._validationState;
                     case "uncheckedMerge":
-                        return {
-                            type: "uncheckedMerge",
-                            mergedOpenings: this._validationState.mergedOpenings.map((o) =>
-                                o.map((edge) => edge.set("coordinate", edge.coordinate.added(offset)))
-                            ),
-                        };
                     case "valid":
                         return {
-                            type: "valid",
+                            type: this._validationState.type,
                             openings: this._validationState.openings.map((edge) => edge.set("coordinate", edge.coordinate.added(offset))),
                         };
                 }
@@ -95,15 +83,9 @@ export class Tilemap {
                     case "invalid":
                         return this._validationState;
                     case "uncheckedMerge":
-                        return {
-                            type: "uncheckedMerge",
-                            mergedOpenings: this._validationState.mergedOpenings.map((o) =>
-                                o.map((edge) => edge.merge({ coordinate: edge.coordinate.rotated(amount, about), direction: rotateDirection(edge.direction, amount) }))
-                            ),
-                        };
                     case "valid":
                         return {
-                            type: "valid",
+                            type: this._validationState.type,
                             openings: this._validationState.openings.map((edge) =>
                                 edge.merge({ coordinate: edge.coordinate.rotated(amount, about), direction: rotateDirection(edge.direction, amount) })
                             ),
@@ -133,7 +115,7 @@ export class Tilemap {
                     return ValidationStates.Unchecked;
                 return {
                     type: "uncheckedMerge",
-                    mergedOpenings: [...getUnmergedOpenings(this._validationState), ...getUnmergedOpenings(other._validationState)],
+                    openings: getUnmergedOpenings(this._validationState).union(getUnmergedOpenings(other._validationState)),
                 };
             })()
         );      
