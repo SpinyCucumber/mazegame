@@ -1,9 +1,6 @@
-import { Map, Set as FixedSet, Record } from "immutable";
+import { Map, Set as FixedSet } from "immutable";
 import { ITileset, TileID } from "./tileset";
-import { Direction, rotateDirection, Coordinate, Offset } from "./math";
-
-type EdgeOptions = { coordinate: Coordinate; direction: Direction };
-export class Edge extends Record<EdgeOptions>({ coordinate: new Coordinate(), direction: Direction.Right }) {}
+import { Direction, rotateDirection, Coordinate, Offset, Edge } from "./math";
 
 namespace ValidationStates {
     export const Unchecked = { type: "unchecked" } as const;
