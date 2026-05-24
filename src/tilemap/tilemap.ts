@@ -128,9 +128,23 @@ export class Tilemap {
         );      
     }
 
+    private validate() {
+        // TODO
+    }
+
+    /**
+     * Checks whether the tilemap is valid
+     * 
+     * A tilemap is "valid" if it meets the following condition:
+     * For each tile, for each direction in which it has a connection, there is
+     * A) a neighboring tile in that direction with a corresponding connection (i.e. a connection in the opposite direction), OR
+     * B) no neighboring tile in that direction
+     * In other words, if there are any tiles with connections that face a tile _without_ a corresponding connection,
+     * the tilemap is invalid.
+     */
     isValid(): boolean {
-        // TOOD
-        return false;
+        this.validate();
+        return this._validationState.type === "valid";
     }
 
 }
