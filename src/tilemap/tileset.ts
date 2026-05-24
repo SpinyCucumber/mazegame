@@ -9,8 +9,8 @@ export interface ITileDefOptions {
 }
 
 export interface ITileDef {
-    id: TileID;
-    hasConnection(dir: Direction): boolean;
+    readonly id: TileID;
+    readonly connections: readonly Direction[];
 }
 
 export interface ITileset {
@@ -36,9 +36,7 @@ export class Tileset implements ITileset {
         const connections = decodeFromBits(bits);
         return {
             id,
-            hasConnection(dir: Direction): boolean {
-                return connections.includes(dir);
-            },
+            connections,
         };
     }
 
