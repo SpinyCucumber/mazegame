@@ -41,6 +41,12 @@ describe("Tilemap", () => {
         expect(t1.isOverlapping(t3)).toBe(false);
     });
 
+    it("merge throws when the tilemaps overlap", () => {
+        const t1 = Tilemap.fromTiles(tileset, [[new Coordinate({ x: 1, y: 2 }), tile(1)]]);
+        const t2 = Tilemap.fromTiles(tileset, [[new Coordinate({ x: 1, y: 2 }), tile(2)]]);
+        expect(() => t1.merge(t2)).toThrow("Cannot merge overlapping tilemaps");
+    });
+
     it("merge combines the tiles of two tilemaps", () => {
         const t1 = Tilemap.fromTiles(tileset, [[new Coordinate({ x: 1, y: 2 }), tile(1)]]);
         const t2 = Tilemap.fromTiles(tileset, [[new Coordinate({ x: 3, y: 4 }), tile(2)]]);

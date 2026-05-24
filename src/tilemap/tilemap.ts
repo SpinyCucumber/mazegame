@@ -105,6 +105,9 @@ export class Tilemap {
         if (this._tileset !== other._tileset) {
             throw new Error("Cannot merge tilemaps with different tilesets");
         }
+        if (this.isOverlapping(other)) {
+            throw new Error("Cannot merge overlapping tilemaps");
+        }
         return new Tilemap(
             this._tileset,
             this.tiles.concat(other.tiles),
