@@ -1,6 +1,6 @@
 import { Map, Set as FixedSet } from "immutable";
 import { ITileset, TileID } from "./tileset";
-import { Direction, rotateDirection, Coordinate, Offset, Edge } from "../utility/math";
+import { Direction, rotateDirection, Coordinate, Offset, Edge, Extent } from "../utility/math";
 
 namespace ValidationStates {
     export const Unchecked = { type: "unchecked" } as const;
@@ -38,6 +38,7 @@ export class Tilemap {
     tiles: Map<Coordinate, IPlacedTile>;
     private _validationState: ValidationState;
     private _tileset: ITileset;
+    private _extent: Extent | null = null;
 
     private constructor(tileset: ITileset, tiles: Iterable<[Coordinate, IPlacedTile]>, validationState: ValidationState) {
         this._tileset = tileset;
@@ -203,6 +204,21 @@ export class Tilemap {
     isValid(): boolean {
         this._validationState = this.validate();
         return this._validationState.type === "valid";
+    }
+
+    getExtent(): Extent {
+        if (this._extent) return this._extent;
+        if (this.tiles.size === 0) {
+            throw new Error("Cannot get extent of an empty tilemap");
+        }
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (const { x, y } of this.tiles.keys()) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+        return this._extent = new Extent({ min: new Coordinate({ x: minX, y: minY }), max: new Coordinate({ x: maxX, y: maxY }) });
     }
 
 }

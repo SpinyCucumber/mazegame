@@ -1,4 +1,4 @@
-import { Coordinate, Direction } from "../utility/math";
+import { Coordinate, Direction, Extent } from "../utility/math";
 import { Tilemap } from "./tilemap";
 import type { IPlacedTile } from "./tilemap";
 import { Tileset } from "./tileset";
@@ -176,5 +176,30 @@ describe("Tilemap.isValid", () => {
             const t2 = Tilemap.fromTiles(validationTileset, [[R1, p(3)]]);
             expect(t1.merge(t2).isValid()).toBe(true);
         });
+    });
+});
+
+describe("Tilemap.getExtent", () => {
+    it("throws for an empty tilemap", () => {
+        const t = Tilemap.fromTiles(tileset, []);
+        expect(() => t.getExtent()).toThrow("Cannot get extent of an empty tilemap");
+    });
+
+    it("returns min === max for a single tile", () => {
+        const coord = new Coordinate({ x: 3, y: -2 });
+        const t = Tilemap.fromTiles(tileset, [[coord, tile(1)]]);
+        expect(t.getExtent()).toEqual(new Extent({ min: coord, max: coord }));
+    });
+
+    it("returns the correct bounding box for multiple tiles", () => {
+        const t = Tilemap.fromTiles(tileset, [
+            [new Coordinate({ x: 1, y: 4 }), tile(1)],
+            [new Coordinate({ x: 3, y: 2 }), tile(2)],
+            [new Coordinate({ x: -1, y: 5 }), tile(3)],
+        ]);
+        expect(t.getExtent()).toEqual(new Extent({
+            min: new Coordinate({ x: -1, y: 2 }),
+            max: new Coordinate({ x: 3, y: 5 }),
+        }));
     });
 });
