@@ -1,8 +1,8 @@
-import { Map, Set } from "immutable";
+import { Map as FixedMap, Set } from "immutable";
 import { ITileset, TileID } from "./tileset";
 import { Direction, rotateDirection, Coordinate, Offset } from "./math";
 
-type Openings = Map<Coordinate, Set<Direction>>;
+type Openings = FixedMap<Coordinate, Set<Direction>>;
 
 namespace ValidationStates {
     export const Unchecked = { type: "unchecked" } as const;
@@ -37,13 +37,13 @@ function getUnmergedOpenings(validationState: ValidationState): Openings[] {
 
 export class Tilemap {
 
-    tiles: Map<Coordinate, IPlacedTile>;
+    tiles: FixedMap<Coordinate, IPlacedTile>;
     private _validationState: ValidationState;
     private _tileset: ITileset;
 
     private constructor(tileset: ITileset, tiles: Iterable<[Coordinate, IPlacedTile]>, validationState: ValidationState) {
         this._tileset = tileset;
-        this.tiles = Map(tiles);
+        this.tiles = FixedMap(tiles);
         this._validationState = validationState;
     }
 
@@ -64,13 +64,13 @@ export class Tilemap {
                         return {
                             type: "uncheckedMerge",
                             mergedOpenings: this._validationState.mergedOpenings.map((o) =>
-                                Map(o.mapKeys((coord) => coord.added(offset)))
+                                FixedMap(o.mapKeys((coord) => coord.added(offset)))
                             ),
                         };
                     case "valid":
                         return {
                             type: "valid",
-                            openings: Map(this._validationState.openings.mapKeys((coord) => coord.added(offset))),
+                            openings: FixedMap(this._validationState.openings.mapKeys((coord) => coord.added(offset))),
                         };
                 }
             })()
@@ -95,13 +95,13 @@ export class Tilemap {
                         return {
                             type: "uncheckedMerge",
                             mergedOpenings: this._validationState.mergedOpenings.map((o) =>
-                                Map(o.mapEntries(([coord, dirs]) => [coord.rotated(amount, about), dirs.map((d) => rotateDirection(d, amount))]))
+                                FixedMap(o.mapEntries(([coord, dirs]) => [coord.rotated(amount, about), dirs.map((d) => rotateDirection(d, amount))]))
                             ),
                         };
                     case "valid":
                         return {
                             type: "valid",
-                            openings: Map(this._validationState.openings.mapEntries(
+                            openings: FixedMap(this._validationState.openings.mapEntries(
                                 ([coord, dirs]) => [coord.rotated(amount, about), dirs.map((d) => rotateDirection(d, amount))])
                             ),
                         };
